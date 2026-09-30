@@ -1,0 +1,512 @@
+<title>Бетон, инертные, ЖБИ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#f3f4f2; --surface:#ffffff; --surface-2:#eceeeb; --line:#dcdfdb; --grid:#e7e9e6;
+  --ink:#16191c; --ink-2:#4d5358; --ink-3:#7d848a;
+  --accent:#2a78d6; --accent-ink:#1c5cab; --accent-soft:#e4eefb;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
+  --bad:#c93b3a; --good:#1a8a4e;
+  --shadow:0 1px 2px rgba(20,30,40,.06),0 4px 16px rgba(20,30,40,.04);
+  --f-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --f-disp:"Unbounded","Onest",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#141618; --surface:#1c1f22; --surface-2:#25292d; --line:#30353a; --grid:#2a2e32;
+    --ink:#f1f3f4; --ink-2:#bcc2c7; --ink-3:#8c949b;
+    --accent:#3987e5; --accent-ink:#86b6ef; --accent-soft:#1d2d42;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+    --bad:#e66767; --good:#3dbb74;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#141618; --surface:#1c1f22; --surface-2:#25292d; --line:#30353a; --grid:#2a2e32;
+  --ink:#f1f3f4; --ink-2:#bcc2c7; --ink-3:#8c949b;
+  --accent:#3987e5; --accent-ink:#86b6ef; --accent-soft:#1d2d42;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+  --bad:#e66767; --good:#3dbb74;
+  --shadow:none;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 56px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+h1{font-family:var(--f-disp);font-weight:600;font-size:clamp(22px,3.4vw,32px);line-height:1.15;margin:6px 0 0;text-wrap:balance;letter-spacing:-.01em}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none}
+.dot.live{background:var(--good)} .dot.err{background:var(--bad)}
+.btn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)} .btn:focus-visible,.tab:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent-ink)}
+nav.tabs{display:flex;gap:4px;margin-top:24px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tab{font:inherit;font-size:14px;font-weight:600;color:var(--ink-2);background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--ink)}
+section.panel{padding-top:24px;display:grid;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:17px;font-weight:600;margin:0}
+.card h3{font-size:14px;font-weight:600;margin:0;color:var(--ink)}
+.sub{font-size:13px;color:var(--ink-3);margin:2px 0 0}
+.card-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.chart-box{position:relative;width:100%}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);padding:6px 12px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.seg button:hover{border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .k{font-size:12px;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.kpi .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px;letter-spacing:-.01em}
+.kpi .n{font-size:12px;color:var(--ink-3)}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
+thead th{position:sticky;top:0;background:var(--surface-2);color:var(--ink-2);font-weight:600;font-size:12px;white-space:normal;vertical-align:bottom;min-width:92px;line-height:1.3}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;min-width:96px}
+thead th:first-child{background:var(--surface-2);z-index:2}
+tr.year td{background:var(--accent-soft);color:var(--accent-ink);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+tr.year td:first-child{background:var(--accent-soft)}
+tbody tr:not(.year):hover td{background:var(--surface-2)}
+td.na{color:var(--ink-3)} td.neg{color:var(--bad)}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:760px){.charts{grid-template-columns:1fr}.wrap{padding-inline:16px}.card{padding:16px}}
+.chart-card .chart-box{height:240px;margin-top:12px}
+.last{font-size:13px;color:var(--ink-3);margin-top:2px;font-variant-numeric:tabular-nums}
+.last b{color:var(--ink);font-weight:600}
+.notice{border:1px solid var(--line);border-left:4px solid var(--bad);background:var(--surface);border-radius:10px;padding:14px 16px;font-size:14px}
+.notice.info{border-left-color:var(--accent)}
+.notice b{display:block;margin-bottom:2px}
+.skeleton{height:260px;border-radius:10px;background:linear-gradient(90deg,var(--surface-2),var(--grid),var(--surface-2));background-size:200% 100%;animation:sh 1.4s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skeleton{animation:none}}
+.filter{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.filter label{font-size:13px;font-weight:600;color:var(--ink-2)}
+.filter select{font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 34px 7px 12px;cursor:pointer;min-width:200px;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.filter select:hover{border-color:var(--accent)} .filter select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filter .nav{display:flex;gap:4px}
+.filter .nav .btn{padding:7px 10px;line-height:1}
+.filter .btn[disabled]{opacity:.4;cursor:default;border-color:var(--line)}
+.filter .hint{font-size:13px;color:var(--ink-3)}
+.kpi .d{font-size:12px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.d.up{color:var(--good)} .d.down{color:var(--bad)} .d.flat{color:var(--ink-3)}
+.period-chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-variant-numeric:tabular-nums}
+.foot{margin-top:28px;font-size:12px;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">МСГ Бетон · отчёт</div>
+      <h1>Бетон, инертные материалы и ЖБИ</h1>
+    </div>
+    <div class="status"><span class="period-chip"><span class="dot live"></span>Данные за 3 месяца: 22.06–22.09.2026</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Разделы отчёта">
+    <button class="tab" role="tab" id="t-reasons" data-tab="reasons" aria-selected="true">Причины отказов</button>
+    <button class="tab" role="tab" id="t-sources" data-tab="sources" aria-selected="false">Источники</button>
+    <button class="tab" role="tab" id="t-avito" data-tab="avito" aria-selected="false">Юнит-экономика: бетон Авито</button>
+    <button class="tab" role="tab" id="t-context" data-tab="context" aria-selected="false">Юнит-экономика: бетон контекст</button>
+    <button class="tab" role="tab" id="t-inert" data-tab="inert" aria-selected="false">Юнит-экономика: инертные</button>
+    <button class="tab" role="tab" id="t-zbi" data-tab="zbi" aria-selected="false">Юнит-экономика: ЖБИ</button>
+  </nav>
+
+  <section class="panel" id="p-reasons" role="tabpanel" aria-labelledby="t-reasons">
+    <div class="filter"><label for="reasonsWeek">Неделя</label><select id="reasonsWeek"></select><div class="nav"><button class="btn" type="button" id="reasonsPrev" aria-label="Предыдущая неделя">‹</button><button class="btn" type="button" id="reasonsNext" aria-label="Следующая неделя">›</button></div><span class="hint" id="reasonsHint"></span></div>
+    <div class="kpis" id="reasonsKpis"></div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Причины отказов</h2><p class="sub" id="reasonsSub"></p></div>
+        <div class="legend" id="reasonsLegend"></div>
+      </div>
+      <div class="chart-box" id="reasonsBox"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-sources" role="tabpanel" aria-labelledby="t-sources" hidden>
+    <div class="filter"><label for="sourcesWeek">Неделя</label><select id="sourcesWeek"></select><div class="nav"><button class="btn" type="button" id="sourcesPrev" aria-label="Предыдущая неделя">‹</button><button class="btn" type="button" id="sourcesNext" aria-label="Следующая неделя">›</button></div><span class="hint" id="sourcesHint"></span></div>
+    <div class="kpis" id="sourcesKpis"></div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Источники лидов</h2><p class="sub" id="sourcesSub"></p></div>
+      </div>
+      <div class="seg" id="stageSeg" role="group" aria-label="Стадия сделки"></div>
+      <div class="chart-box" id="sourcesBox" style="margin-top:16px"></div>
+    </div>
+  </section>
+
+  <div id="unitPanels"></div>
+
+  <p class="foot">Период сбора данных: 3 месяца, с 22.06 по 22.09.2026. «Причины отказов» и «Источники» — выгрузка сделок воронки «MSG Бетон» из Битрикс24 (2529 сделок, по дате создания). Юнит-экономика — по календарным месяцам (июнь, июль, август 2026), сентябрь в таблице ещё не заполнен. Таблица: <a href="https://docs.google.com/spreadsheets/d/1Rpn6HAMBLPWE3yH6QWGrVcHXbdJTEXIP8OGMUhqc3P8/edit" target="_blank" rel="noopener">«Отчет по бетону/инертным материалам/ЖБИ»</a>.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+const W = {"weeks": [{"id": "0622", "label": "22.06–28.06", "deals": 93, "reasons": [{"name": "Не выходит на связь", "values": [11, 2]}, {"name": "Не устраивает цена продукции", "values": [12, 2]}, {"name": "Нерентабельная или неудобная логистика", "values": [5, 3]}, {"name": "Тендер / Оценка для тендера", "values": [13, 3]}, {"name": "У покупателя отказался заказчик", "values": [1, 0]}], "sources": [{"name": "1С (А)", "values": [23, 1, 1, 0, 10, 11]}, {"name": "Авито (А)", "values": [51, 42, 6, 0, 0, 3]}, {"name": "Звонок (А)", "values": [10, 9, 0, 0, 0, 1]}, {"name": "Не указан", "values": [4, 0, 0, 0, 3, 1]}, {"name": "Постоянный клиент (Р)", "values": [1, 0, 0, 0, 0, 1]}, {"name": "мсгбетон.рф (А)", "values": [4, 0, 4, 0, 0, 0]}]}, {"id": "0629", "label": "29.06–05.07", "deals": 178, "reasons": [{"name": "Заморозка или прекращение стройки", "values": [1, 0]}, {"name": "Не выходит на связь", "values": [18, 9]}, {"name": "Не устраивает цена продукции", "values": [11, 6]}, {"name": "Нерентабельная или неудобная логистика", "values": [8, 2]}, {"name": "Нет в наличии / Не можем привезти", "values": [3, 2]}, {"name": "Причина не указана", "values": [0, 1]}, {"name": "Тендер / Оценка для тендера", "values": [28, 4]}], "sources": [{"name": "1С (А)", "values": [54, 4, 1, 0, 22, 27]}, {"name": "Авито (А)", "values": [79, 69, 7, 0, 1, 2]}, {"name": "Звонок (А)", "values": [17, 14, 3, 0, 0, 0]}, {"name": "Не указан", "values": [7, 0, 0, 0, 5, 2]}, {"name": "мсгбетон.рф (А)", "values": [20, 5, 15, 0, 0, 0]}, {"name": "мсгмаркет.рф (А)", "values": [1, 1, 0, 0, 0, 0]}]}, {"id": "0706", "label": "06.07–12.07", "deals": 174, "reasons": [{"name": "Не выходит на связь", "values": [15, 4]}, {"name": "Не устраивает цена продукции", "values": [7, 2]}, {"name": "Нерентабельная или неудобная логистика", "values": [6, 2]}, {"name": "Нет в наличии / Не можем привезти", "values": [1, 0]}, {"name": "Причина не указана", "values": [0, 1]}, {"name": "Тендер / Оценка для тендера", "values": [42, 7]}, {"name": "У покупателя отказался заказчик", "values": [0, 1]}], "sources": [{"name": "1С (А)", "values": [43, 2, 2, 0, 16, 23]}, {"name": "Авито (А)", "values": [80, 71, 5, 0, 0, 4]}, {"name": "Звонок (А)", "values": [11, 7, 1, 0, 0, 3]}, {"name": "Не указан", "values": [20, 1, 1, 0, 10, 8]}, {"name": "Постоянный клиент (Р)", "values": [2, 1, 1, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [18, 6, 9, 0, 1, 2]}]}, {"id": "0713", "label": "13.07–19.07", "deals": 163, "reasons": [{"name": "Заморозка или прекращение стройки", "values": [1, 1]}, {"name": "Не выходит на связь", "values": [9, 3]}, {"name": "Не устраивает цена продукции", "values": [5, 1]}, {"name": "Нерентабельная или неудобная логистика", "values": [6, 2]}, {"name": "Нет в наличии / Не можем привезти", "values": [8, 3]}, {"name": "Тендер / Оценка для тендера", "values": [30, 16]}, {"name": "У покупателя отказался заказчик", "values": [0, 1]}], "sources": [{"name": "1С (А)", "values": [54, 8, 1, 0, 22, 23]}, {"name": "Авито (А)", "values": [64, 59, 3, 0, 0, 2]}, {"name": "Звонок (А)", "values": [21, 16, 1, 0, 0, 4]}, {"name": "Не указан", "values": [14, 0, 0, 0, 8, 6]}, {"name": "мсгбетон.рф (А)", "values": [10, 3, 7, 0, 0, 0]}]}, {"id": "0720", "label": "20.07–26.07", "deals": 198, "reasons": [{"name": "Долгие сроки изготовления", "values": [6, 3]}, {"name": "Заморозка или прекращение стройки", "values": [2, 0]}, {"name": "Не выходит на связь", "values": [7, 0]}, {"name": "Не устраивает цена продукции", "values": [8, 2]}, {"name": "Нерентабельная или неудобная логистика", "values": [2, 1]}, {"name": "Нет в наличии / Не можем привезти", "values": [13, 0]}, {"name": "Причина не указана", "values": [0, 1]}, {"name": "Тендер / Оценка для тендера", "values": [26, 9]}, {"name": "У покупателя отказался заказчик", "values": [0, 1]}], "sources": [{"name": "1С (А)", "values": [48, 3, 2, 1, 22, 20]}, {"name": "Авито (А)", "values": [74, 64, 3, 0, 0, 7]}, {"name": "Звонок (А)", "values": [15, 9, 2, 0, 0, 4]}, {"name": "Не указан", "values": [23, 0, 2, 0, 13, 8]}, {"name": "Постоянный клиент (Р)", "values": [1, 1, 0, 0, 0, 0]}, {"name": "Создан вручную", "values": [17, 1, 16, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [20, 3, 15, 0, 0, 2]}]}, {"id": "0727", "label": "27.07–02.08", "deals": 197, "reasons": [{"name": "Долгие сроки изготовления", "values": [0, 1]}, {"name": "Заморозка или прекращение стройки", "values": [2, 0]}, {"name": "Не выходит на связь", "values": [20, 3]}, {"name": "Не устраивает цена продукции", "values": [15, 2]}, {"name": "Нерентабельная или неудобная логистика", "values": [6, 2]}, {"name": "Нет в наличии / Не можем привезти", "values": [2, 3]}, {"name": "Тендер / Оценка для тендера", "values": [22, 13]}], "sources": [{"name": "1С (А)", "values": [51, 1, 0, 1, 33, 16]}, {"name": "Авито (А)", "values": [83, 67, 5, 1, 0, 10]}, {"name": "ВК (А)", "values": [1, 1, 0, 0, 0, 0]}, {"name": "Звонок (А)", "values": [20, 18, 1, 0, 0, 1]}, {"name": "Не указан", "values": [10, 0, 0, 0, 6, 4]}, {"name": "Постоянный клиент (Р)", "values": [1, 0, 0, 0, 0, 1]}, {"name": "Создан вручную", "values": [18, 0, 18, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [10, 3, 6, 0, 0, 1]}, {"name": "мсгмаркет.рф (А)", "values": [3, 1, 2, 0, 0, 0]}]}, {"id": "0803", "label": "03.08–09.08", "deals": 208, "reasons": [{"name": "Не выходит на связь", "values": [31, 3]}, {"name": "Не устраивает цена продукции", "values": [16, 0]}, {"name": "Нерентабельная или неудобная логистика", "values": [11, 1]}, {"name": "Нет в наличии / Не можем привезти", "values": [5, 0]}, {"name": "Тендер / Оценка для тендера", "values": [28, 11]}, {"name": "У покупателя отказался заказчик", "values": [2, 0]}], "sources": [{"name": "1С (А)", "values": [53, 1, 4, 1, 26, 21]}, {"name": "Авито (А)", "values": [109, 93, 6, 1, 0, 9]}, {"name": "Звонок (А)", "values": [8, 4, 1, 0, 0, 3]}, {"name": "Не указан", "values": [12, 0, 0, 0, 7, 5]}, {"name": "Постоянный клиент (Р)", "values": [1, 0, 0, 0, 0, 1]}, {"name": "Создан вручную", "values": [12, 3, 9, 0, 0, 0]}, {"name": "Яндекс Карты (А)", "values": [1, 0, 1, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [7, 2, 4, 0, 0, 1]}, {"name": "мсгмаркет.рф (А)", "values": [5, 5, 0, 0, 0, 0]}]}, {"id": "0810", "label": "10.08–16.08", "deals": 191, "reasons": [{"name": "Долгие сроки изготовления", "values": [1, 1]}, {"name": "Изменён / Дубль", "values": [1, 0]}, {"name": "Не выходит на связь", "values": [8, 6]}, {"name": "Не устраивает цена продукции", "values": [15, 3]}, {"name": "Нерентабельная или неудобная логистика", "values": [2, 3]}, {"name": "Нет в наличии / Не можем привезти", "values": [3, 1]}, {"name": "Срочный заказ / на нерабочий день", "values": [0, 1]}, {"name": "Тендер / Оценка для тендера", "values": [14, 16]}, {"name": "У покупателя отказался заказчик", "values": [0, 1]}], "sources": [{"name": "1С (А)", "values": [58, 5, 1, 1, 37, 14]}, {"name": "Авито (А)", "values": [57, 44, 6, 4, 0, 3]}, {"name": "ВК (А)", "values": [2, 2, 0, 0, 0, 0]}, {"name": "Звонок (А)", "values": [26, 19, 1, 0, 0, 6]}, {"name": "Не указан", "values": [24, 0, 0, 0, 16, 8]}, {"name": "Постоянный клиент (Р)", "values": [1, 0, 0, 0, 0, 1]}, {"name": "Создан вручную", "values": [16, 4, 12, 0, 0, 0]}, {"name": "Яндекс Карты (А)", "values": [1, 1, 0, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [4, 1, 2, 0, 0, 1]}, {"name": "мсгмаркет.рф (А)", "values": [2, 0, 1, 0, 0, 1]}]}, {"id": "0817", "label": "17.08–23.08", "deals": 200, "reasons": [{"name": "Долгие сроки изготовления", "values": [0, 1]}, {"name": "Другое", "values": [0, 1]}, {"name": "Заморозка или прекращение стройки", "values": [1, 0]}, {"name": "Изменён / Дубль", "values": [0, 1]}, {"name": "Не выходит на связь", "values": [15, 5]}, {"name": "Не устраивает цена продукции", "values": [14, 6]}, {"name": "Нерентабельная или неудобная логистика", "values": [1, 1]}, {"name": "Нет в наличии / Не можем привезти", "values": [6, 1]}, {"name": "Тендер / Оценка для тендера", "values": [40, 24]}, {"name": "У покупателя отказался заказчик", "values": [0, 3]}], "sources": [{"name": "1С (А)", "values": [52, 6, 1, 0, 29, 16]}, {"name": "Авито (А)", "values": [86, 77, 2, 2, 0, 5]}, {"name": "Звонок (А)", "values": [20, 19, 0, 0, 0, 1]}, {"name": "Не указан", "values": [21, 0, 0, 0, 14, 7]}, {"name": "Постоянный клиент (Р)", "values": [1, 1, 0, 0, 0, 0]}, {"name": "Создан вручную", "values": [7, 5, 1, 1, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [13, 12, 0, 1, 0, 0]}]}, {"id": "0824", "label": "24.08–30.08", "deals": 225, "reasons": [{"name": "Долгие сроки изготовления", "values": [1, 0]}, {"name": "Другое", "values": [5, 1]}, {"name": "Заморозка или прекращение стройки", "values": [2, 0]}, {"name": "Не выходит на связь", "values": [15, 0]}, {"name": "Не можем произвести", "values": [2, 0]}, {"name": "Не устраивает цена продукции", "values": [34, 10]}, {"name": "Нет в наличии / Не можем привезти", "values": [12, 0]}, {"name": "Срочный заказ / на нерабочий день", "values": [7, 0]}, {"name": "Тендер / Оценка для тендера", "values": [20, 7]}, {"name": "У покупателя отказался заказчик", "values": [1, 0]}], "sources": [{"name": "1С (А)", "values": [54, 1, 2, 0, 27, 24]}, {"name": "Авито (А)", "values": [110, 99, 3, 2, 0, 6]}, {"name": "База для обзвона/Холодная база (Р)", "values": [1, 0, 1, 0, 0, 0]}, {"name": "ВК (А)", "values": [1, 0, 0, 0, 0, 1]}, {"name": "Звонок (А)", "values": [14, 11, 0, 1, 0, 2]}, {"name": "Не указан", "values": [26, 0, 0, 0, 21, 5]}, {"name": "Постоянный клиент (Р)", "values": [2, 1, 0, 1, 0, 0]}, {"name": "Создан вручную", "values": [11, 5, 6, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [6, 0, 3, 0, 0, 3]}]}, {"id": "0831", "label": "31.08–06.09", "deals": 195, "reasons": [{"name": "Другое", "values": [4, 0]}, {"name": "Не выходит на связь", "values": [20, 2]}, {"name": "Не устраивает цена продукции", "values": [25, 8]}, {"name": "Нерентабельная или неудобная логистика", "values": [1, 0]}, {"name": "Нет в наличии / Не можем привезти", "values": [1, 1]}, {"name": "Причина не указана", "values": [0, 1]}, {"name": "Тендер / Оценка для тендера", "values": [2, 0]}], "sources": [{"name": "1С (А)", "values": [56, 2, 0, 4, 39, 11]}, {"name": "Авито (А)", "values": [72, 53, 0, 16, 0, 3]}, {"name": "Звонок (А)", "values": [18, 9, 0, 7, 0, 2]}, {"name": "Не указан", "values": [40, 1, 1, 0, 28, 10]}, {"name": "Создан вручную", "values": [2, 0, 1, 1, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [3, 0, 2, 0, 0, 1]}, {"name": "мсгмаркет.рф (А)", "values": [4, 0, 4, 0, 0, 0]}]}, {"id": "0907", "label": "07.09–13.09", "deals": 226, "reasons": [{"name": "Долгие сроки изготовления", "values": [1, 0]}, {"name": "Другое", "values": [1, 0]}, {"name": "Не выходит на связь", "values": [20, 0]}, {"name": "Не можем произвести", "values": [4, 1]}, {"name": "Не устраивает цена продукции", "values": [16, 2]}, {"name": "Нет в наличии / Не можем привезти", "values": [9, 1]}, {"name": "Срочный заказ / на нерабочий день", "values": [2, 0]}, {"name": "Тендер / Оценка для тендера", "values": [2, 0]}, {"name": "У покупателя отказался заказчик", "values": [3, 0]}], "sources": [{"name": "1С (А)", "values": [64, 1, 0, 3, 32, 28]}, {"name": "Авито (А)", "values": [92, 58, 6, 21, 0, 7]}, {"name": "Звонок (А)", "values": [24, 1, 1, 19, 0, 3]}, {"name": "Не указан", "values": [32, 0, 2, 0, 22, 8]}, {"name": "Создан вручную", "values": [5, 1, 3, 1, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [7, 0, 4, 3, 0, 0]}, {"name": "мсгмаркет.рф (А)", "values": [2, 1, 1, 0, 0, 0]}]}, {"id": "0914", "label": "14.09–20.09", "deals": 229, "reasons": [{"name": "Другое", "values": [2, 0]}, {"name": "Не выходит на связь", "values": [3, 0]}, {"name": "Не можем произвести", "values": [2, 0]}, {"name": "Не устраивает цена продукции", "values": [7, 7]}, {"name": "Нерентабельная или неудобная логистика", "values": [2, 0]}, {"name": "Нет в наличии / Не можем привезти", "values": [5, 2]}, {"name": "Причина не указана", "values": [0, 1]}, {"name": "Срочный заказ / на нерабочий день", "values": [4, 0]}, {"name": "Тендер / Оценка для тендера", "values": [1, 0]}], "sources": [{"name": "1С (А)", "values": [64, 3, 4, 5, 33, 19]}, {"name": "Авито (А)", "values": [85, 26, 3, 50, 3, 3]}, {"name": "Звонок (А)", "values": [23, 4, 2, 17, 0, 0]}, {"name": "Не указан", "values": [42, 0, 1, 0, 30, 11]}, {"name": "Постоянный клиент (Р)", "values": [1, 0, 0, 1, 0, 0]}, {"name": "Создан вручную", "values": [4, 0, 2, 2, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [7, 2, 3, 1, 0, 1]}, {"name": "мсгмаркет.рф (А)", "values": [3, 1, 2, 0, 0, 0]}]}, {"id": "0921", "label": "21.09–22.09", "deals": 52, "reasons": [{"name": "Не выходит на связь", "values": [1, 0]}, {"name": "Не можем произвести", "values": [1, 0]}], "sources": [{"name": "1С (А)", "values": [15, 0, 0, 6, 3, 6]}, {"name": "Авито (А)", "values": [17, 2, 0, 15, 0, 0]}, {"name": "Звонок (А)", "values": [3, 0, 0, 3, 0, 0]}, {"name": "Не указан", "values": [8, 0, 0, 0, 7, 1]}, {"name": "Создан вручную", "values": [6, 0, 0, 6, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [3, 0, 0, 3, 0, 0]}]}], "all": {"id": "", "label": "22.06–22.09", "deals": 2529, "reasons": [{"name": "Долгие сроки изготовления", "values": [9, 6]}, {"name": "Другое", "values": [12, 2]}, {"name": "Заморозка или прекращение стройки", "values": [9, 1]}, {"name": "Изменён / Дубль", "values": [1, 1]}, {"name": "Не выходит на связь", "values": [193, 37]}, {"name": "Не можем произвести", "values": [9, 1]}, {"name": "Не устраивает цена продукции", "values": [185, 51]}, {"name": "Нерентабельная или неудобная логистика", "values": [50, 17]}, {"name": "Нет в наличии / Не можем привезти", "values": [68, 14]}, {"name": "Причина не указана", "values": [0, 5]}, {"name": "Срочный заказ / на нерабочий день", "values": [13, 1]}, {"name": "Тендер / Оценка для тендера", "values": [268, 110]}, {"name": "У покупателя отказался заказчик", "values": [7, 7]}], "sources": [{"name": "1С (А)", "values": [689, 38, 19, 22, 351, 259]}, {"name": "Авито (А)", "values": [1059, 824, 55, 112, 4, 64]}, {"name": "База для обзвона/Холодная база (Р)", "values": [1, 0, 1, 0, 0, 0]}, {"name": "ВК (А)", "values": [4, 3, 0, 0, 0, 1]}, {"name": "Звонок (А)", "values": [230, 140, 13, 47, 0, 30]}, {"name": "Не указан", "values": [283, 2, 7, 0, 190, 84]}, {"name": "Постоянный клиент (Р)", "values": [11, 4, 1, 2, 0, 4]}, {"name": "Создан вручную", "values": [98, 19, 68, 11, 0, 0]}, {"name": "Яндекс Карты (А)", "values": [2, 1, 1, 0, 0, 0]}, {"name": "мсгбетон.рф (А)", "values": [132, 37, 74, 8, 1, 12]}, {"name": "мсгмаркет.рф (А)", "values": [20, 9, 10, 0, 0, 1]}]}, "srcSeries": ["Всего", "Отказ", "Спам", "В работе", "Договор/Оплата", "Успешна"], "rSeries": ["Авито", "Прочие"]};
+const U = {"avito": {"title": "Бетон · Авито", "headers": ["Месяц", "Затраты на продвижение", "Просмотры", "Лиды", "Квалифицированные лиды", "Сделки", "Конверсия просмотры/лиды", "Конверсия лид/сделка", "Выручка", "Рентабельность", "Стоимость одного лида", "Стоимость одной сделки", "Средний чек 1 сделки", "Прибыль с 1 сделки", "ROI", "Время среднего ответа (мин)", "Кол-во отзывов"], "rows": [["Июнь", "34367", "961", "79", "72", "12", "8,22%", "16,67%", "886920", "12%", "477", "2864", "73910", "8869", "209,69", "20", "4"], ["Июль", "15404", "589", "124", "116", "14", "21,05%", "12,07%", "767250", "12%", "133", "1100", "54804", "6576", "497,7", "36", "1"], ["Август", "24103", "766", "155", "150", "14", "20,23%", "9,33%", "960560", "10%", "161", "1722", "68611", "6861", "298,52", "37", "2"]]}, "context": {"title": "Бетон · контекстная реклама", "headers": ["Месяц", "Затраты на продвижение", "Показы", "Переходы", "Лиды", "Квалифицированные лиды", "Сделки", "Конверсия просмотры/лиды", "Конверсия лид/сделка", "Выручка", "Рентабельность", "Стоимость одного лида", "Стоимость одной сделки", "Средний чек 1 сделки", "Прибыль с 1 сделки", "ROI"], "rows": [["Июнь", "23801,06", "15218", "519", "7", "6", "4", "0,04%", "57,14%", "387900", "12%", "3966,84", "5950,27", "96975", "11637", "95,57%"], ["Июль", "25743,07", "19904", "531", "29", "17", "2", "0,09%", "6,90%", "189760", "12%", "1514,3", "12871,54", "94880", "11385,6", "-11,54%"], ["Август", "33213,79", "13254", "476", "19", "14", "0", "0,11%", "0,00%", "0", "12%", "2372,41", "#DIV/0!", "#DIV/0!", "#DIV/0!", "#DIV/0!"]]}, "inert": {"title": "Инертные материалы", "headers": ["Месяц", "Затраты на продвижение", "Просмотры", "Лиды", "Квалифицированные лиды", "Сделки", "Конверсия просмотры/лиды", "Конверсия лид/сделка", "Выручка", "Рентабельность", "Стоимость одного лида", "Стоимость одной сделки", "Средний чек 1 сделки", "Прибыль с 1 сделки", "ROI", "Время среднего ответа (мин)", "Кол-во отзывов"], "rows": [["Июнь", "50523", "1522", "83", "83", "14", "5,45%", "16,87%", "479040", "10%", "609", "3609", "34217", "3422", "-5,18", "19", "1"], ["Июль", "40435", "1326", "107", "100", "13", "8,07%", "13,00%", "303462", "10%", "404", "3110", "23343", "2334", "-24,95", "26", "1"], ["Август", "26068", "1052", "136", "131", "26", "12,93%", "19,85%", "543353", "10%", "199", "1003", "20898", "2090", "108,44", "12 (с учётом одного долгого ответа — 40 мин)", "1"]]}, "zbi": {"title": "ЖБИ", "headers": ["Месяц", "Затраты на продвижение", "Просмотры", "Лиды", "Квалифицированные лиды", "Сделки", "Конверсия просмотры/лиды", "Конверсия лид/сделка", "Выручка", "Рентабельность", "Стоимость одного лида", "Стоимость одной сделки", "Средний чек 1 сделки", "Прибыль с 1 сделки", "ROI", "Время среднего ответа (мин)", "Кол-во отзывов"], "rows": [["Июнь", "9376", "1267", "109", "91", "16", "8,60%", "17,58%", "660696", "10%", "103", "586", "41294", "4129", "604,67", "579", "2"], ["Июль", "14064", "1345", "92", "88", "5", "6,84%", "5,68%", "182562", "10%", "160", "2813", "36512", "3651", "29,81", "34", "0"], ["Август", "31507", "2417", "106", "100", "4", "4,39%", "4,00%", "176610", "10%", "315", "7877", "44153", "4415", "-43,95", "32", ""]]}};
+const $ = (id) => document.getElementById(id);
+const UNIT_KEYS = Object.keys(U);
+const TABS = ["reasons","sources"].concat(UNIT_KEYS);
+const state = {tab:"reasons", week:{reasons:"", sources:""}, month:{}, stage:0, charts:{}};
+try{ const s = JSON.parse(localStorage.getItem("mbj-state") || "null"); if(s){ if(s.week) Object.assign(state.week, s.week); if(s.month) Object.assign(state.month, s.month); if(typeof s.stage === "number") state.stage = s.stage; } }catch(e){}
+function save(){ try{ localStorage.setItem("mbj-state", JSON.stringify({week:state.week, month:state.month, stage:state.stage})); }catch(e){} }
+
+/* ---------- unit panels markup ---------- */
+$("unitPanels").outerHTML = UNIT_KEYS.map(k => `
+  <section class="panel" id="p-${k}" role="tabpanel" aria-labelledby="t-${k}" hidden>
+    <div class="filter"><label for="${k}Month">Месяц</label><select id="${k}Month"></select><div class="nav"><button class="btn" type="button" id="${k}Prev" aria-label="Предыдущий месяц">‹</button><button class="btn" type="button" id="${k}Next" aria-label="Следующий месяц">›</button></div><span class="hint" id="${k}Hint"></span></div>
+    <div class="kpis" id="${k}Kpis"></div>
+    <div class="card">
+      <div class="card-head"><div><h2>Юнит-экономика: ${esc(U[k].title.toLowerCase())}</h2><p class="sub" id="${k}TableSub"></p></div></div>
+      <div class="table-wrap" id="${k}Table"></div>
+    </div>
+    <div class="charts" id="${k}Charts"></div>
+  </section>`).join("");
+
+/* ---------- tabs ---------- */
+function showTab(name){
+  if(!TABS.includes(name)) name = "reasons";
+  state.tab = name;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  TABS.forEach(t => { $("p-"+t).hidden = t !== name; });
+  try{ localStorage.setItem("mbj-tab", name); }catch(e){}
+  render(name);
+}
+
+/* ---------- theme ---------- */
+function tok(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function onTheme(){ render(state.tab); }
+try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme); }catch(e){}
+new MutationObserver(onTheme).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+
+/* ---------- formatting ---------- */
+const nf0 = new Intl.NumberFormat("ru-RU", {maximumFractionDigits:0});
+const nf1 = new Intl.NumberFormat("ru-RU", {maximumFractionDigits:1});
+const nf2 = new Intl.NumberFormat("ru-RU", {minimumFractionDigits:2, maximumFractionDigits:2});
+const rub = (v) => nf0.format(Math.round(v)) + " ₽";
+const pct = (v) => (Math.abs(v - Math.round(v)) < 1e-9 ? nf0.format(v) : nf2.format(v)) + "%";
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
+function isErr(s){ return typeof s === "string" && /^#/.test(s.trim()); }
+function parseNum(s){
+  if(s === null || s === undefined || isErr(s)) return null;
+  const t = String(s).replace(/\s/g,"").replace("%","").replace(",",".");
+  if(!/^-?\d+(\.\d+)?$/.test(t)) return null;
+  return parseFloat(t);
+}
+function colKind(h){
+  h = (h || "").toLowerCase();
+  if(/конверс|рентаб/.test(h)) return "pct";
+  if(/roi/.test(h)) return "roi";
+  if(/затрат|выручк|стоимост|чек|прибыл/.test(h)) return "rub";
+  if(/время/.test(h)) return "text";
+  return "int";
+}
+function cellText(raw, kind){
+  if(raw === "" || raw === null || raw === undefined) return {t:"", cls:""};
+  if(isErr(raw)) return {t:"—", cls:"na", title:"В таблице ошибка: " + raw + " (деление на ноль)"};
+  const n = parseNum(raw);
+  if(n === null || kind === "text") return {t:String(raw), cls:""};
+  if(kind === "pct") return {t:pct(n), cls:""};
+  if(kind === "rub") return {t:rub(n), cls: n < 0 ? "neg" : ""};
+  if(kind === "roi") return {t: String(raw).includes("%") ? pct(n) : nf2.format(n), cls: n < 0 ? "neg" : ""};
+  return {t: Number.isInteger(n) ? nf0.format(n) : nf2.format(n), cls:""};
+}
+function fmtKind(v, kind){ if(v === null || v === undefined) return "нет данных"; return kind === "pct" ? pct(v) : kind === "rub" ? rub(v) : nf0.format(v); }
+
+/* ---------- chart helpers ---------- */
+function baseFont(){ return {family: tok("--f-body") || "system-ui", size: 12}; }
+function destroy(key){ if(state.charts[key]){ state.charts[key].destroy(); delete state.charts[key]; } }
+function ensureCanvas(boxId, h){ const box = $(boxId); box.innerHTML = ""; box.style.height = h + "px"; const cv = document.createElement("canvas"); box.appendChild(cv); return cv; }
+function tooltipStyle(){
+  return { backgroundColor: tok("--surface"), titleColor: tok("--ink"), bodyColor: tok("--ink-2"), borderColor: tok("--line"), borderWidth: 1, padding: 10, cornerRadius: 8,
+    titleFont: {...baseFont(), weight: "600", size: 13}, bodyFont: baseFont(), boxPadding: 4, usePointStyle: true };
+}
+const endLabels = {
+  id: "endLabels",
+  afterDatasetsDraw(chart, args, opts){
+    if(!opts || !opts.enabled) return;
+    const {ctx} = chart; ctx.save();
+    ctx.font = "600 12px " + (tok("--f-body") || "system-ui"); ctx.fillStyle = opts.color; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    const lastIdx = chart.data.datasets.length - 1;
+    chart.getDatasetMeta(lastIdx).data.forEach((bar, i) => {
+      const total = opts.totals ? opts.totals[i] : chart.data.datasets[lastIdx].data[i];
+      if(total === null || total === undefined) return;
+      ctx.fillText(opts.fmt ? opts.fmt(total, i) : nf0.format(total), bar.x + 6, bar.y);
+    });
+    ctx.restore();
+  }
+};
+const topLabel = {
+  id: "topLabel",
+  afterDatasetsDraw(chart, args, opts){
+    if(!opts || !opts.enabled) return;
+    const {ctx} = chart; ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    chart.getDatasetMeta(0).data.forEach((bar, i) => {
+      const v = chart.data.datasets[0].data[i]; if(v === null || v === undefined) return;
+      ctx.font = (i === opts.sel ? "700 13px " : "500 12px ") + (tok("--f-body") || "system-ui");
+      ctx.fillStyle = i === opts.sel ? opts.color : opts.muted;
+      ctx.fillText(opts.fmt(v), bar.x, bar.y - 6);
+    });
+    ctx.restore();
+  }
+};
+function noData(boxId, text){ $(boxId).style.height = "auto"; $(boxId).innerHTML = `<div class="notice info">${esc(text)}</div>`; }
+
+/* ---------- week filter ---------- */
+function weekOf(key){ return W.weeks.find(w => w.id === state.week[key]) || null; }
+function periodOf(key){ return weekOf(key) || W.all; }
+function periodName(p){ return p === W.all ? "весь период 22.06–22.09.2026" : "неделя " + p.label + ".2026"; }
+function renderWeekFilter(key){
+  const sel = $(key + "Week");
+  if(!sel.dataset.bound){
+    sel.innerHTML = `<option value="">Весь период · 22.06–22.09 (3 месяца)</option>` +
+      `<optgroup label="По неделям">` + W.weeks.map(w => `<option value="${w.id}">${esc(w.label)} · ${nf0.format(w.deals)} сделок</option>`).join("") + `</optgroup>`;
+    sel.dataset.bound = "1";
+    sel.addEventListener("change", () => { state.week[key] = sel.value; save(); render(key); });
+    $(key + "Prev").addEventListener("click", () => stepWeek(key, -1));
+    $(key + "Next").addEventListener("click", () => stepWeek(key, 1));
+  }
+  if(state.week[key] && !weekOf(key)) state.week[key] = "";
+  sel.value = state.week[key];
+  const idx = W.weeks.findIndex(w => w.id === state.week[key]);
+  $(key + "Prev").disabled = idx === 0;
+  $(key + "Next").disabled = idx === -1 || idx === W.weeks.length - 1;
+  $(key + "Hint").textContent = idx === -1 ? "Суммарно за 3 месяца: с 22.06 по 22.09.2026" : "Сделки, созданные с " + W.weeks[idx].label + ".2026";
+}
+function stepWeek(key, dir){
+  let idx = W.weeks.findIndex(w => w.id === state.week[key]);
+  if(idx === -1) idx = dir < 0 ? W.weeks.length : -1;
+  idx = Math.max(0, Math.min(W.weeks.length - 1, idx + dir));
+  state.week[key] = W.weeks[idx].id; save(); render(key);
+}
+function kpi(k, v, n){ return `<div class="kpi"><div class="k">${esc(k)}</div><div class="v">${v}</div><div class="n">${esc(n)}</div></div>`; }
+
+/* ---------- Reasons ---------- */
+function renderReasons(){
+  renderWeekFilter("reasons");
+  const p = periodOf("reasons");
+  destroy("reasons");
+  const colors = ["--s1","--s2"].map(tok);
+  const items = p.reasons.map(it => ({...it, total: it.values[0] + it.values[1]})).sort((a,b) => b.total - a.total);
+  const grand = items.reduce((a, it) => a + it.total, 0);
+  const av = items.reduce((a, it) => a + it.values[0], 0);
+  const top = items[0];
+  $("reasonsKpis").innerHTML = [
+    kpi("Отказов", nf0.format(grand), periodName(p)),
+    kpi("Доля отказов", p.deals ? nf1.format(grand / p.deals * 100) + "%" : "—", "от " + nf0.format(p.deals) + " сделок"),
+    kpi("Из них Авито", nf0.format(av), grand ? nf1.format(av / grand * 100) + "% отказов" : "—"),
+    kpi("Главная причина", top ? nf0.format(top.total) : "—", top ? top.name : "отказов нет")
+  ].join("");
+  $("reasonsSub").textContent = "Всего отказов: " + nf0.format(grand) + " · " + periodName(p) + ". Разбивка по каналам: Авито и прочие";
+  $("reasonsLegend").innerHTML = W.rSeries.map((s,i) => `<span><i style="background:${colors[i]}"></i>${esc(s)}</span>`).join("");
+  if(!items.length){ noData("reasonsBox", "За эту неделю отказов нет."); return; }
+  const cv = ensureCanvas("reasonsBox", Math.max(220, items.length * 44 + 40));
+  state.charts.reasons = new Chart(cv, {
+    type: "bar",
+    data: { labels: items.map(it => it.name), datasets: W.rSeries.map((s, si) => ({
+      label: s, data: items.map(it => it.values[si]), backgroundColor: colors[si], borderColor: tok("--surface"), borderWidth: {right: 2},
+      borderRadius: si === 1 ? {topRight: 4, bottomRight: 4} : 0, borderSkipped: false, barPercentage: .72, categoryPercentage: .9 })) },
+    options: {
+      indexAxis: "y", maintainAspectRatio: false, animation: {duration: 300}, layout: {padding: {right: 48}},
+      scales: {
+        x: {stacked: true, beginAtZero: true, grid: {color: tok("--grid")}, border: {display:false}, ticks: {color: tok("--ink-3"), font: baseFont(), precision: 0}},
+        y: {stacked: true, grid: {display:false}, border: {color: tok("--line")}, ticks: {color: tok("--ink"), font: {...baseFont(), size: 13}}}
+      },
+      plugins: {
+        legend: {display: false},
+        tooltip: {...tooltipStyle(), mode: "index", intersect: false,
+          callbacks: { footer: (its) => "Итого: " + nf0.format(items[its[0].dataIndex].total) + " (" + nf2.format(items[its[0].dataIndex].total / (grand||1) * 100) + "% всех отказов)" },
+          footerColor: tok("--ink"), footerFont: {...baseFont(), weight: "600"}},
+        endLabels: {enabled: true, color: tok("--ink"), totals: items.map(it => it.total)}
+      }
+    },
+    plugins: [endLabels]
+  });
+}
+
+/* ---------- Sources ---------- */
+function renderSources(){
+  renderWeekFilter("sources");
+  const p = periodOf("sources");
+  const S = W.srcSeries;
+  if(state.stage >= S.length) state.stage = 0;
+  $("stageSeg").innerHTML = S.map((s, i) => `<button type="button" id="stage-${i}" aria-pressed="${i === state.stage}" data-i="${i}">${esc(s)}</button>`).join("");
+  $("stageSeg").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.stage = +b.dataset.i; save(); renderSources(); }));
+  const tot = (i) => p.sources.reduce((a, it) => a + it.values[i], 0);
+  const all = tot(0);
+  $("sourcesKpis").innerHTML = [
+    kpi("Сделок", nf0.format(all), periodName(p)),
+    kpi("Успешные", nf0.format(tot(5)), all ? nf1.format(tot(5) / all * 100) + "% сделок" : "—"),
+    kpi("Отгрузка / оплата", nf0.format(tot(4)), all ? nf1.format(tot(4) / all * 100) + "% сделок" : "—"),
+    kpi("Отказ и спам", nf0.format(tot(1) + tot(2)), all ? nf1.format((tot(1) + tot(2)) / all * 100) + "% сделок" : "—")
+  ].join("");
+  const si = state.stage, stage = S[si];
+  destroy("sources");
+  const items = p.sources.map(it => ({name: it.name, v: it.values[si], all: it.values[0]})).filter(it => it.all > 0).sort((a,b) => b.v - a.v || b.all - a.all);
+  const sum = items.reduce((a, it) => a + it.v, 0);
+  $("sourcesSub").textContent = "Стадия сделки: " + stage.toLowerCase() + " · " + nf0.format(sum) + " сделок · " + periodName(p);
+  if(!items.length){ noData("sourcesBox", "За эту неделю сделок нет."); return; }
+  const cv = ensureCanvas("sourcesBox", Math.max(220, items.length * 36 + 40));
+  state.charts.sources = new Chart(cv, {
+    type: "bar",
+    data: { labels: items.map(it => it.name), datasets: [{ label: stage, data: items.map(it => it.v), backgroundColor: tok("--accent"), borderRadius: {topRight:4, bottomRight:4}, borderSkipped: false, barPercentage: .7, categoryPercentage: .9 }] },
+    options: {
+      indexAxis: "y", maintainAspectRatio: false, animation: {duration: 300}, layout: {padding: {right: 84}},
+      scales: {
+        x: {beginAtZero: true, grid: {color: tok("--grid")}, border: {display:false}, ticks: {color: tok("--ink-3"), font: baseFont(), precision: 0}},
+        y: {grid: {display:false}, border: {color: tok("--line")}, ticks: {color: tok("--ink"), font: {...baseFont(), size: 13}}}
+      },
+      plugins: {
+        legend: {display:false},
+        tooltip: {...tooltipStyle(), callbacks: {
+          label: (c) => " " + stage + ": " + nf0.format(c.raw),
+          afterLabel: (c) => { const it = items[c.dataIndex]; const out = [];
+            if(sum) out.push("Доля в стадии: " + nf2.format(it.v / sum * 100) + "%");
+            if(si !== 0 && it.all) out.push("От всех сделок источника: " + nf2.format(it.v / it.all * 100) + "% (" + nf0.format(it.v) + " из " + nf0.format(it.all) + ")");
+            return out; } }},
+        endLabels: {enabled: true, color: tok("--ink"), fmt: (v) => nf0.format(v) + (sum && v ? "  ·  " + nf0.format(v / sum * 100) + "%" : "")}
+      }
+    },
+    plugins: [endLabels]
+  });
+}
+
+/* ---------- Unit economics ---------- */
+const SHORT = {"июнь":"Июн","июль":"Июл","август":"Авг","сентябрь":"Сен"};
+const CHARTS = [
+  {re: /конверсия просмотры/i, title: "Конверсия просмотры → лиды", kind: "pct", type: "line"},
+  {re: /конверсия лид/i, title: "Конверсия лид → сделка", kind: "pct", type: "line"},
+  {re: /затрат/i, title: "Затраты на продвижение", kind: "rub", type: "bar"},
+  {re: /^лиды$/i, title: "Лиды", kind: "int", type: "bar"},
+  {re: /^сделки$/i, title: "Сделки", kind: "int", type: "bar"},
+  {re: /выручк/i, title: "Выручка", kind: "rub", type: "bar"}
+];
+const KPIS = [
+  {re: /затрат/i, k: "Затраты", kind: "rub", goodUp: false},
+  {re: /^лиды$/i, k: "Лиды", kind: "int", goodUp: true},
+  {re: /^сделки$/i, k: "Сделки", kind: "int", goodUp: true},
+  {re: /выручк/i, k: "Выручка", kind: "rub", goodUp: true}
+];
+function col(d, re){ return d.headers.findIndex(h => re.test(h.trim())); }
+function deltaHtml(cur, prev, kind, goodUp, prevName){
+  if(cur === null) return `<div class="d flat">Нет данных за месяц</div>`;
+  if(prev === null || prev === undefined) return `<div class="d flat">${prevName ? "Нет данных за " + esc(prevName) : "Первый месяц периода"}</div>`;
+  const diff = cur - prev;
+  if(Math.abs(diff) < 1e-9) return `<div class="d flat">= как в ${esc(prevName)}</div>`;
+  const up = diff > 0, good = up === goodUp;
+  const abs = kind === "rub" ? rub(Math.abs(diff)) : nf0.format(Math.abs(diff));
+  const rel = prev ? " (" + (up ? "+" : "−") + nf0.format(Math.abs(diff / prev * 100)) + "%)" : "";
+  return `<div class="d ${good ? "up" : "down"}">${up ? "▲ +" : "▼ −"}${abs}${rel} к ${esc(prevName)}</div>`;
+}
+function renderUnit(key){
+  const d = U[key];
+  const months = d.rows.map((r, i) => ({id: String(i), label: r[0], full: r[0] + " 2026", short: (SHORT[r[0].toLowerCase()] || r[0]) + " 26", cells: r}));
+  const sel = $(key + "Month");
+  if(!sel.dataset.bound){
+    sel.innerHTML = `<option value="">Весь период · июнь–август 2026</option>` + months.map(m => `<option value="${m.id}">${esc(m.full)}</option>`).join("");
+    sel.dataset.bound = "1";
+    sel.addEventListener("change", () => { state.month[key] = sel.value; save(); render(key); });
+    const step = (dir) => { let i = months.findIndex(m => m.id === (state.month[key] || "")); if(i === -1) i = dir < 0 ? months.length : -1; i = Math.max(0, Math.min(months.length - 1, i + dir)); state.month[key] = months[i].id; save(); render(key); };
+    $(key + "Prev").addEventListener("click", () => step(-1));
+    $(key + "Next").addEventListener("click", () => step(1));
+  }
+  const cur = state.month[key] || "";
+  const selIdx = months.findIndex(m => m.id === cur);
+  sel.value = selIdx >= 0 ? cur : "";
+  $(key + "Prev").disabled = selIdx === 0;
+  $(key + "Next").disabled = selIdx === -1 || selIdx === months.length - 1;
+  $(key + "Hint").textContent = "Период данных: 3 месяца, 22.06–22.09.2026 · по календарным месяцам, сентябрь ещё не заполнен";
+  const selM = selIdx >= 0 ? months[selIdx] : null;
+  const prevM = selIdx > 0 ? months[selIdx - 1] : null;
+  const nextM = selIdx >= 0 && selIdx < months.length - 1 ? months[selIdx + 1] : null;
+  const kinds = d.headers.map(colKind);
+  // table
+  $(key + "TableSub").textContent = selM ? selM.full + " — строка из Google Таблицы" : "Июнь–август 2026, как в Google Таблице";
+  let html = "<table><thead><tr>" + d.headers.map(h => `<th scope="col">${esc(h)}</th>`).join("") + "</tr></thead><tbody>";
+  html += `<tr class="year"><td colspan="${d.headers.length}">2026 · период 22.06–22.09</td></tr>`;
+  (selM ? [selM] : months).forEach(m => {
+    html += "<tr>" + d.headers.map((h, i) => {
+      if(i === 0) return `<td>${esc(m.label)}</td>`;
+      const t = cellText(m.cells[i], kinds[i]);
+      return `<td class="${t.cls}"${t.title ? ` title="${esc(t.title)}"` : ""}>${esc(t.t)}</td>`;
+    }).join("") + "</tr>";
+  });
+  $(key + "Table").innerHTML = html + "</tbody></table>";
+  // KPIs
+  $(key + "Kpis").innerHTML = KPIS.map(c => {
+    const ci = col(d, c.re);
+    if(selM){
+      const v = parseNum(selM.cells[ci]), pv = prevM ? parseNum(prevM.cells[ci]) : null;
+      return `<div class="kpi"><div class="k">${c.k}</div><div class="v">${v === null ? "—" : fmtKind(v, c.kind)}</div><div class="n">${esc(selM.full)}</div>${deltaHtml(v, pv, c.kind, c.goodUp, prevM ? prevM.full : "")}</div>`;
+    }
+    const s = months.reduce((a, m) => a + (parseNum(m.cells[ci]) || 0), 0);
+    return kpi(c.k, fmtKind(s, c.kind), "Итого, июнь–август 2026");
+  }).join("");
+  // charts
+  CHARTS.forEach((_, i) => destroy(key + i));
+  const list = CHARTS.map(c => ({...c, ci: col(d, c.re)})).filter(c => c.ci >= 0);
+  $(key + "Charts").innerHTML = list.map((c, i) => `<div class="card chart-card"><h3>${c.title}</h3><div class="last" id="${key}Last${i}"></div><div class="chart-box" id="${key}Box${i}"></div></div>`).join("");
+  const chartMonths = selM ? [prevM, selM, nextM].filter(Boolean) : months;
+  const selPos = selM ? chartMonths.indexOf(selM) : -1;
+  list.forEach((c, i) => {
+    const val = (m) => m ? parseNum(m.cells[c.ci]) : null;
+    const vals = chartMonths.map(val);
+    let lastI = -1; vals.forEach((v, j) => { if(v !== null) lastI = j; });
+    $(key + "Last" + i).innerHTML = selM
+      ? (prevM ? `${esc(prevM.full)}: ${fmtKind(val(prevM), c.kind)} · ` : "") + `${esc(selM.full)}: <b>${fmtKind(vals[selPos], c.kind)}</b>` + (nextM ? ` · ${esc(nextM.full)}: ${fmtKind(val(nextM), c.kind)}` : "")
+      : (lastI >= 0 ? `${esc(chartMonths[lastI].short)}: <b>${fmtKind(vals[lastI], c.kind)}</b>` : "Нет данных");
+    const cv = ensureCanvas(key + "Box" + i, 240);
+    const color = tok("--accent");
+    const type = selM ? "bar" : c.type;
+    const ds = type === "line"
+      ? {data: vals, borderColor: color, backgroundColor: color + "22", fill: true, borderWidth: 2, tension: .25,
+         pointRadius: vals.map((v, j) => j === lastI ? 5 : 3), pointHoverRadius: 6, pointBackgroundColor: color, pointBorderColor: tok("--surface"), pointBorderWidth: 2}
+      : {data: vals, backgroundColor: vals.map((v, j) => (selM ? j === selPos : j === lastI) ? color : color + (selM ? "59" : "99")), borderRadius: {topLeft:4, topRight:4}, borderSkipped: false,
+         barPercentage: .7, categoryPercentage: .85, maxBarThickness: 110};
+    state.charts[key + i] = new Chart(cv, {
+      type, data: {labels: chartMonths.map(m => selM ? m.full : m.short), datasets: [{label: c.title, ...ds}]},
+      options: {
+        maintainAspectRatio: false, animation: {duration: 300}, interaction: {mode: "index", intersect: false},
+        layout: {padding: {top: 22}},
+        scales: {
+          x: {grid: {display: false}, border: {color: tok("--line")}, ticks: {maxRotation: 0, color: (ctx) => selM && ctx.index === selPos ? tok("--ink") : tok("--ink-3"),
+              font: (ctx) => selM && ctx.index === selPos ? {...baseFont(), weight: "700"} : baseFont()}},
+          y: {beginAtZero: true, grid: {color: tok("--grid")}, border: {display: false},
+              ticks: {color: tok("--ink-3"), font: baseFont(), maxTicksLimit: 6, precision: c.kind === "int" ? 0 : undefined,
+                callback: (v) => c.kind === "pct" ? nf1.format(v) + "%" : c.kind === "rub" ? (Math.abs(v) >= 1e6 ? nf2.format(v/1e6).replace(/,00$/,"") + " млн" : Math.abs(v) >= 1e3 ? nf0.format(v/1e3) + " тыс" : nf0.format(v)) : nf0.format(v)}}
+        },
+        plugins: {legend: {display: false}, tooltip: {...tooltipStyle(), displayColors: false, callbacks: {label: (ctx) => fmtKind(ctx.raw, c.kind)}},
+          topLabel: {enabled: true, color: tok("--ink"), muted: tok("--ink-3"), sel: selM ? selPos : lastI, fmt: (v) => fmtKind(v, c.kind)}}
+      },
+      plugins: [topLabel]
+    });
+  });
+}
+
+/* ---------- boot ---------- */
+function render(name){
+  if(typeof Chart === "undefined"){ return; }
+  if(name === "reasons") renderReasons();
+  else if(name === "sources") renderSources();
+  else renderUnit(name);
+}
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+let initial = (location.hash || "").slice(1);
+if(!TABS.includes(initial)){ try{ initial = localStorage.getItem("mbj-tab") || "reasons"; }catch(e){ initial = "reasons"; } }
+showTab(initial);
+})();
+</script>
